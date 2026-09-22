@@ -1,0 +1,22 @@
+{
+  "name": "@careconnect/api-worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --local --persist-to=.wrangler/state",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 execute careconnect --local --file=./migrations/0001_init.sql",
+    "db:seed:local": "wrangler d1 execute careconnect --local --file=./migrations/0002_seed.sql",
+    "db:migrate:remote": "wrangler d1 execute careconnect --remote --file=./migrations/0001_init.sql",
+    "db:seed:remote": "wrangler d1 execute careconnect --remote --file=./migrations/0002_seed.sql"
+  },
+  "dependencies": {
+    "hono": "^4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "typescript": "^5.6.2",
+    "wrangler": "^3.91.0"
+  }
+}

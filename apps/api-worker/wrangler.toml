@@ -1,0 +1,17 @@
+name = "careconnect-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-25"
+
+[vars]
+# Comma-separated patient emails that receive high-urgency alerts (optional)
+# ALERT_EMAILS = ""
+
+[[d1_databases]]
+binding = "DB"
+# Create with: npx wrangler d1 create careconnect  (then paste database_id here for --remote deploys)
+database_name = "careconnect"
+database_id = "4ce101ef-eef7-4d07-a397-0aec62086937"
+
+# Cron: daily 9am lapsed drip + hourly 24h-anniversary review check
+[triggers]
+crons = ["0 9 * * *", "0 * * * *"]
