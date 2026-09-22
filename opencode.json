@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "bash": "allow",
+    "edit": "allow"
+  }
+}

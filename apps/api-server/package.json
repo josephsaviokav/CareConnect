@@ -1,0 +1,25 @@
+{
+  "name": "@carrstack/api-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@carrstack/shared-types": "*",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.2.0",
+    "@fastify/cors": "^10.0.1",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "typescript": "^5.6.2",
+    "@types/node": "^22.7.4",
+    "@types/pg": "^8.11.0"
+  }
+}

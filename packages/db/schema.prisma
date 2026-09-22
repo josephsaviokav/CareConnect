@@ -1,0 +1,55 @@
+// Prisma schema for CarrStack Automation
+// Run: npx prisma migrate dev --name init (requires DATABASE_URL)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id              Int           @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  email           String        @unique
+  phone           String?
+  last_visit_date DateTime?     @db.Date
+  status          String        @default("active")
+  source          String        @default("website")
+  created_at      DateTime      @default(now()) @db.Timestamptz
+  appointments    Appointment[]
+  communications  Communication[]
+}
+
+model Appointment {
+  id             Int      @id @default(autoincrement())
+  patient_id     Int
+  patient        Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  date           DateTime @db.Timestamptz
+  procedure_type String
+  status         String   @default("scheduled")
+  created_at     DateTime @default(now()) @db.Timestamptz
+}
+
+model Communication {
+  id         Int      @id @default(autoincrement())
+  patient_id Int
+  patient    Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  type       String   @default("email")
+  direction  String
+  content    String
+  intent     String?
+  urgency    String?  @default("low")
+  timestamp  DateTime @default(now()) @db.Timestamptz
+}
+
+model Campaign {
+  id            Int      @id @default(autoincrement())
+  name          String
+  trigger_event String
+  template_body String
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz
+}
