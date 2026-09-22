@@ -308,12 +308,6 @@ export default function Dashboard() {
                 className="w-36 bg-transparent text-cream outline-none placeholder:text-sage/70"
               />
             </label>
-            <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-forest-900 text-sage ring-1 ring-white/10">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-[18px] w-[18px]">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-              </svg>
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-brand" />
-            </span>
           </div>
         </header>
         {/* Mobile nav */}
