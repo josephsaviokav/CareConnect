@@ -1,5 +1,5 @@
-import pg from "pg";
 import { seedPatients } from "./seed-data.js";
+import { createPool } from "./pg.js";
 
 export interface StoredCommunication {
   id: number;
@@ -13,11 +13,7 @@ export interface StoredCommunication {
   timestamp: string;
 }
 
-const useMock = !process.env.DATABASE_URL || process.env.USE_MOCK_DB === "true";
-let pool: pg.Pool | null = null;
-if (!useMock && process.env.DATABASE_URL) {
-  pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-}
+const pool = createPool();
 
 // In-memory fallback for hackathon demo (no local Postgres)
 const memory: StoredCommunication[] = [];

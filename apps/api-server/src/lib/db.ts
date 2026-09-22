@@ -1,14 +1,8 @@
-import pg from "pg";
 import { LAPSED_PATIENTS_SQL, getLapsedPatients } from "../services/segmentation.js";
 import { seedPatients } from "./seed-data.js";
+import { createPool } from "./pg.js";
 
-const { Pool } = pg;
-const useMock = !process.env.DATABASE_URL || process.env.USE_MOCK_DB === "true";
-
-let pool: pg.Pool | null = null;
-if (!useMock) {
-  pool = new Pool({ connectionString: process.env.DATABASE_URL });
-}
+const pool = createPool();
 
 export async function queryLapsedPatients() {
   if (pool) {

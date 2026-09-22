@@ -25,7 +25,7 @@ Goal: Complete, functional prototype for hackathon presentation â€” monorep
 | Frontend Web | Next.js (App Router), React, Tailwind CSS | Staff dashboard in `apps/web` |
 | Mobile Companion | Expo (React Native) | Staff notifications in `apps/mobile` |
 | Backend Engine | Node.js with Fastify (fallback: Express) | REST API in `apps/api-server` |
-| Database | PostgreSQL (strictly normalized) | Complex SQL JOINs for patient segmentation. Schema in `packages/db` |
+| Database | PostgreSQL on Supabase cloud (strictly normalized) | Complex SQL JOINs for patient segmentation. Schema in `packages/db`. Local mock fallback when `USE_MOCK_DB=true`. See `.env.example` for Supabase setup. |
 | ORM | Prisma or Drizzle | Use Prisma by default unless repo already uses Drizzle |
 | AI Integration | Lightweight LLM wrapper (Phi-3 / LLaMA via API or Ollama local) | Email intent parsing + auto-response in `packages/email-parser` |
 | Shared Types | TypeScript interfaces | In `packages/shared-types` |

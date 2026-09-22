@@ -10,7 +10,11 @@ if (!url || process.env.USE_MOCK_DB === "true") {
   process.exit(0);
 }
 
-const pool = new pg.Pool({ connectionString: url });
+const needsSSL = process.env.PGSSL === "true" || /supabase\.co/.test(url || "");
+const pool = new pg.Pool({
+  connectionString: url,
+  ssl: needsSSL ? { rejectUnauthorized: false } : undefined,
+});
 for (const p of seedPatients) {
   await pool.query(
     `INSERT INTO patients (id, first_name, last_name, email, phone, last_visit_date, status, source)
