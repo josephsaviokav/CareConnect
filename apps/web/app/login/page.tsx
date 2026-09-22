@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiBase, loadSession, saveSession } from "../lib/session";
+import { loadSession, saveSession } from "../lib/session";
 
 const DEMO: Record<"clinic" | "patient", { email: string; password: string; hint: string }> = {
   clinic: { email: "clinic@careconnect.demo", password: "clinic123", hint: "Staff → full practice dashboard" },
@@ -14,8 +14,6 @@ export default function Login() {
   const [role, setRole] = useState<"clinic" | "patient">("clinic");
   const [email, setEmail] = useState(DEMO.clinic.email);
   const [password, setPassword] = useState(DEMO.clinic.password);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (typeof window !== "undefined") {
     const s = loadSession();
@@ -26,30 +24,19 @@ export default function Login() {
     setRole(r);
     setEmail(DEMO[r].email);
     setPassword(DEMO[r].password);
-    setError(null);
   }
 
-  async function submit(e: React.FormEvent) {
+  // Demo mode: no credential checking — one click signs in with a local
+  // session and routes by tab (clinic → dashboard, patient → portal).
+  function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await fetch(`${apiBase()}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!r.ok) {
-        const data = await r.json().catch(() => ({}));
-        throw new Error((data as any).error || `login ${r.status}`);
-      }
-      const s = await r.json();
-      saveSession(s);
-      router.replace(s.role === "clinic" ? "/" : "/portal");
-    } catch (err: any) {
-      setError(err.message || "Login failed — is the backend running?");
-    } finally {
-      setBusy(false);
+    const expires_at = new Date(Date.now() + 12 * 3600 * 1000).toISOString();
+    if (role === "clinic") {
+      saveSession({ token: "demo", role: "clinic", name: "Dr. Lauren Park", email, patient_id: null, expires_at });
+      router.replace("/");
+    } else {
+      saveSession({ token: "demo", role: "patient", name: "Alice Smith", email, patient_id: 1, expires_at });
+      router.replace("/portal");
     }
   }
 
@@ -88,18 +75,14 @@ export default function Login() {
         <form onSubmit={submit} className="mt-4 space-y-3">
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" required className={input} />
           <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" required className={input} />
-          {error && (
-            <p className="rounded-xl bg-red-500/10 px-4 py-2.5 text-sm text-red-300 ring-1 ring-red-400/30">{error}</p>
-          )}
           <button
             type="submit"
-            disabled={busy}
-            className="w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-brand-ink transition hover:bg-brand-hover disabled:opacity-50"
+            className="w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-brand-ink transition hover:bg-brand-hover"
           >
-            {busy ? "Signing in…" : `Sign in as ${role === "clinic" ? "Clinic" : "Patient"}`}
+            {`Sign in as ${role === "clinic" ? "Clinic" : "Patient"}`}
           </button>
         </form>
-        <p className="mt-4 text-center text-[11px] text-sage/70">Demo build — credentials are pre-filled. Prototype-grade auth.</p>
+        <p className="mt-4 text-center text-[11px] text-sage/70">Demo mode — sign-in skips authentication.</p>
       </div>
     </main>
   );
