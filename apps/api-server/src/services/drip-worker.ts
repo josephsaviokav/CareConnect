@@ -1,9 +1,8 @@
 import cron from "node-cron";
 import type { Appointment } from "@careconnect/shared-types";
-import { getLapsedPatients } from "./segmentation.js";
 import { campaigns, renderTemplate, lastProcedureFor, getPatientById } from "../lib/campaigns.js";
 import { saveOutboundCommunication, listCommunications } from "../lib/communications.js";
-import { seedAppointments } from "../lib/seed-data.js";
+import { queryAppointments, queryLapsedPatients } from "../lib/db.js";
 
 export interface DripDetail {
   patient_id: number;
@@ -27,22 +26,30 @@ async function alreadySent(patient_id: number, marker: string, since: Date): Pro
   );
 }
 
+function toDateOnly(v: unknown): string | null {
+  if (!v) return null;
+  return new Date(v as string).toISOString().split("T")[0];
+}
+
 /**
  * Daily reactivation drip: all lapsed patients get campaign #1 with
  * personalized tokens (treatment history via last completed procedure).
  * Skips patients contacted in the last 7 days so daily cron stays idempotent.
+ * Reads from Postgres/Supabase when DATABASE_URL is set, else mock seed.
  */
 export async function runLapsedDrip(now: Date = new Date()): Promise<DripResult> {
   const campaign = campaigns.find((c) => c.id === 1 && c.is_active);
   if (!campaign) return { job: "lapsed", queued: 0, details: [] };
-  const lapsed = getLapsedPatients(undefined, undefined, now);
+  const { data: lapsed } = await queryLapsedPatients();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
   const details: DripDetail[] = [];
-  for (const p of lapsed) {
+  for (const p of lapsed as any[]) {
     if (await alreadySent(p.id, LAPSED_MARKER, weekAgo)) continue;
-    const text = renderTemplate(campaign.template_body, p as any, {
-      last_procedure: lastProcedureFor(p.id),
-    });
+    const text = renderTemplate(
+      campaign.template_body,
+      { first_name: p.first_name, last_visit_date: toDateOnly(p.last_visit_date), source: p.source },
+      { last_procedure: await lastProcedureFor(p.id) }
+    );
     const saved = await saveOutboundCommunication({
       patient_id: p.id,
       content: `${LAPSED_MARKER} ${text}`,
@@ -62,15 +69,16 @@ export interface ReviewDripOpts {
 /**
  * Post-appointment drip: completed appointments whose age falls in
  * [minAgeHours, maxAgeHours] get campaign #2 (review request).
- * Cron uses 23â€“25h so each appointment triggers exactly once, one hour after
- * its 24h anniversary. Demo/manual runs use 0â€“24h ("completed in last day").
+ * Cron uses 23–25h so each appointment triggers exactly once, one hour after
+ * its 24h anniversary. Demo/manual runs use 0–24h ("completed in last day").
  */
 export async function runReviewDrip(opts: ReviewDripOpts = {}): Promise<DripResult> {
-  const { minAgeHours = 0, maxAgeHours = 24, now = new Date(), appointments = seedAppointments } = opts;
+  const { minAgeHours = 0, maxAgeHours = 24, now = new Date(), appointments } = opts;
+  const all = (appointments ?? (await queryAppointments())) as Appointment[];
   const campaign = campaigns.find((c) => c.id === 2 && c.is_active);
   if (!campaign) return { job: "review", queued: 0, details: [] };
   const details: DripDetail[] = [];
-  const due = appointments
+  const due = all
     .filter((a) => a.status === "completed")
     .filter((a) => {
       const ageH = (now.getTime() - new Date(a.date).getTime()) / 3600000;
@@ -79,9 +87,9 @@ export async function runReviewDrip(opts: ReviewDripOpts = {}): Promise<DripResu
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 
   for (const appt of due) {
-    const patient = getPatientById(appt.patient_id);
+    const patient = await getPatientById(appt.patient_id);
     if (!patient) continue;
-    // One review request per appointment â€” skip if already sent after the visit.
+    // One review request per appointment — skip if already sent after the visit.
     if (await alreadySent(appt.patient_id, `${REVIEW_MARKER}#${appt.id}`, new Date(appt.date))) continue;
     const text = renderTemplate(campaign.template_body, patient as any, {
       last_procedure: appt.procedure_type,
@@ -98,9 +106,10 @@ export async function runReviewDrip(opts: ReviewDripOpts = {}): Promise<DripResu
 
 /** Single-appointment review trigger backing POST /api/appointments/:id/review-request. */
 export async function sendReviewForAppointment(appointmentId: number): Promise<DripDetail | null> {
-  const appt = seedAppointments.find((a) => a.id === appointmentId);
+  const all = (await queryAppointments()) as Appointment[];
+  const appt = all.find((a) => a.id === appointmentId);
   if (!appt || appt.status !== "completed") return null;
-  const patient = getPatientById(appt.patient_id);
+  const patient = await getPatientById(appt.patient_id);
   if (!patient) return null;
   const campaign = campaigns.find((c) => c.id === 2)!;
   const text = renderTemplate(campaign.template_body, patient as any, {
@@ -115,7 +124,7 @@ export async function sendReviewForAppointment(appointmentId: number): Promise<D
 }
 
 /**
- * Scheduler â€” daily 9am lapsed drip + hourly 24h-anniversary review check.
+ * Scheduler — daily 9am lapsed drip + hourly 24h-anniversary review check.
  * Disabled with ENABLE_CRON=false (tests, hackathon manual demo).
  */
 export function startDripCron(): void {

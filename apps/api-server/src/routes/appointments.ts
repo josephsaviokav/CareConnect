@@ -1,12 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import { seedAppointments } from "../lib/seed-data.js";
+import { queryAppointments } from "../lib/db.js";
 import { sendReviewForAppointment } from "../services/drip-worker.js";
 
 export async function appointmentRoutes(app: FastifyInstance) {
   // GET /api/appointments?status=completed
   app.get("/api/appointments", async (req) => {
     const q = req.query as { status?: string; patient_id?: string };
-    let rows = seedAppointments;
+    let rows = (await queryAppointments()) as any[];
     if (q.status) rows = rows.filter((a) => a.status === q.status);
     if (q.patient_id) rows = rows.filter((a) => a.patient_id === Number(q.patient_id));
     return rows;

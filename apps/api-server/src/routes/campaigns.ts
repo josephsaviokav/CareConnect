@@ -16,10 +16,10 @@ export async function campaignRoutes(app: FastifyInstance) {
     }
     let queued = 0;
     for (const pid of body.patient_ids) {
-      const patient = getPatientById(pid);
+      const patient = await getPatientById(pid);
       if (!patient) continue;
       const text = renderTemplate(campaign.template_body, patient as any, {
-        last_procedure: lastProcedureFor(pid),
+        last_procedure: await lastProcedureFor(pid),
       });
       await saveOutboundCommunication({ patient_id: pid, content: `[${campaign.name}] ${text}` });
       queued++;

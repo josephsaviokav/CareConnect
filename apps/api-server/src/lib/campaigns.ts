@@ -1,4 +1,4 @@
-import { seedAppointments, seedPatients } from "./seed-data.js";
+import { queryLastProcedure, queryPatientById } from "./db.js";
 
 export interface Campaign {
   id: number;
@@ -53,13 +53,10 @@ export function renderTemplate(
     .replaceAll("{{interest}}", extra.last_procedure || "a checkup");
 }
 
-export function lastProcedureFor(patientId: number): string {
-  const done = seedAppointments
-    .filter((a) => a.patient_id === patientId && a.status === "completed")
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
-  return done[0]?.procedure_type || "checkup";
+export function lastProcedureFor(patientId: number): Promise<string> {
+  return queryLastProcedure(patientId);
 }
 
 export function getPatientById(id: number) {
-  return seedPatients.find((p) => p.id === id) || null;
+  return queryPatientById(id);
 }

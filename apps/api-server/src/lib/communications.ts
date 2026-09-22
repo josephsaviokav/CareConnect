@@ -1,5 +1,5 @@
-import { seedPatients } from "./seed-data.js";
 import { createPool } from "./pg.js";
+import { queryPatientByEmail } from "./db.js";
 
 export interface StoredCommunication {
   id: number;
@@ -19,8 +19,8 @@ const pool = createPool();
 const memory: StoredCommunication[] = [];
 let nextId = 1;
 
-export function resolvePatientIdByEmail(email: string): number | null {
-  const found = seedPatients.find((p) => p.email.toLowerCase() === email.toLowerCase());
+export async function resolvePatientIdByEmail(email: string): Promise<number | null> {
+  const found = await queryPatientByEmail(email);
   return found ? found.id : null;
 }
 
@@ -32,11 +32,23 @@ export async function saveInboundCommunication(args: {
   urgency: string;
 }): Promise<StoredCommunication> {
   if (pool) {
-    // Postgres requires a valid patient_id FK — caller must resolve or create a lead first.
+    // Unknown senders become leads so the FK always resolves (cloud mode).
+    let pid = args.patient_id;
+    if (!pid) {
+      const handle = args.patient_email.split("@")[0].replace(/[^a-z0-9._-]+/gi, "") || "unknown";
+      const { rows } = await pool.query(
+        `INSERT INTO patients (first_name, last_name, email, status, source)
+         VALUES ($1, '', $2, 'lead', 'email')
+         ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+         RETURNING id`,
+        [handle, args.patient_email]
+      );
+      pid = rows[0].id;
+    }
     const { rows } = await pool.query(
       `INSERT INTO communications (patient_id, type, direction, content, intent, urgency)
        VALUES ($1, 'email', 'inbound', $2, $3, $4) RETURNING *`,
-      [args.patient_id, args.content, args.intent, args.urgency]
+      [pid, args.content, args.intent, args.urgency]
     );
     const r = rows[0];
     return {

@@ -14,7 +14,7 @@ export async function inboundRoutes(app: FastifyInstance) {
       subject: body.subject || "",
       body: body.body,
     });
-    const patient_id = resolvePatientIdByEmail(body.from);
+    const patient_id = await resolvePatientIdByEmail(body.from);
     const saved = await saveInboundCommunication({
       patient_id,
       patient_email: body.from,
