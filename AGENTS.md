@@ -24,12 +24,12 @@ Goal: Complete, functional prototype for hackathon presentation â€” monorep
 |---|---|---|
 | Frontend Web | Next.js (App Router), React, Tailwind CSS | Staff dashboard in `apps/web` |
 | Mobile Companion | Expo (React Native) | Staff notifications in `apps/mobile` |
-| Backend Engine | Node.js with Fastify (fallback: Express) | REST API in `apps/api-server` |
-| Database | PostgreSQL on Supabase cloud (strictly normalized) | Complex SQL JOINs for patient segmentation. Schema in `packages/db`. Local mock fallback when `USE_MOCK_DB=true`. See `.env.example` for Supabase setup. |
+| Backend Engine | Cloudflare Workers + Hono | REST API in `apps/api-worker` (`src/index.ts`). `apps/api-server` (Node/Fastify) kept as local-dev fallback. |
+| Database | Cloudflare D1 (SQLite, strictly normalized) | Patient segmentation via `NOT EXISTS` query in `apps/api-worker/src/index.ts` (`LAPSED_SQL`). Schema + seed: `apps/api-worker/migrations/*.sql`. Local D1 via `wrangler dev --local`. |
 | ORM | Prisma or Drizzle | Use Prisma by default unless repo already uses Drizzle |
 | AI Integration | Lightweight LLM wrapper (Phi-3 / LLaMA via API or Ollama local) | Email intent parsing + auto-response in `packages/email-parser` |
 | Shared Types | TypeScript interfaces | In `packages/shared-types` |
-| Scheduler | node-cron or BullMQ worker | Drip / reactivation logic in backend |
+| Scheduler | Workers Cron Triggers (`[triggers] crons` in `wrangler.toml`) | Drip / reactivation logic in `apps/api-worker/src/index.ts` (`runLapsedDrip`, `runReviewDrip`); manual runs via `POST /api/drip/run` |
 | Mock SMTP | Nodemailer Ethereal / console mock | Simulate dispatch, do NOT send real email in prototype |
 | Workspace Manager | npm workspaces | Root `package.json` |
 | Agent Permissions | `opencode.json` | `"bash": "allow", "edit": "allow"` |
@@ -54,6 +54,11 @@ careconnect-automation/
 â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx      # Main dashboard: lapsed patients table
 â”‚   â”‚   â”‚   â””â”€â”€ api/
 â”‚   â”œâ”€â”€ mobile/               # Expo app for staff notifications
+│   ├── api-worker/            # Cloudflare Workers backend (Hono + D1) — primary
+│   │   ├── src/index.ts       # All routes + scheduled drip handlers
+│   │   ├── src/logic.ts       # Pure helpers (templates, email triage)
+│   │   ├── wrangler.toml      # D1 binding + cron triggers
+│   │   └── migrations/        # D1 schema (0001) + seed (0002)
 â”‚   â””â”€â”€ api-server/           # Node.js backend (Fastify/Express)
 â”‚       â”œâ”€â”€ src/
 â”‚       â”‚   â”œâ”€â”€ index.ts
