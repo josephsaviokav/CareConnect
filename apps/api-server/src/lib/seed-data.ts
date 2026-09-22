@@ -1,8 +1,8 @@
-import type { Patient, Appointment } from "@carrstack/shared-types";
+import type { Patient, Appointment } from "@careconnect/shared-types";
 
 // Local mock seed (mirrors packages/db/src/seed-data.ts).
 // Duplicated to keep api-server build self-contained (rootDir=src).
-// TODO Phase 2: switch to @carrstack/db workspace import via bundler.
+// TODO Phase 2: switch to @careconnect/db workspace import via bundler.
 const monthsAgo = (n: number) => {
   const d = new Date();
   d.setMonth(d.getMonth() - n);

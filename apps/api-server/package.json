@@ -1,5 +1,5 @@
 {
-  "name": "@carrstack/api-server",
+  "name": "@careconnect/api-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@carrstack/shared-types": "*",
+    "@careconnect/shared-types": "*",
     "@fastify/cors": "^10.0.1",
     "dotenv": "^16.4.5",
     "fastify": "^5.2.0",

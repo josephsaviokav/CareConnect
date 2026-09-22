@@ -1,4 +1,4 @@
-# AGENTS.md — CarrStack Automation (Dental Practice Marketing Automation)
+# AGENTS.md â€” careconnect Automation (Dental Practice Marketing Automation)
 
 > **Agent Context File for OpenCode.**
 > Always read this file first before any `/build` operation.
@@ -6,7 +6,7 @@
 
 ## 1. Project Overview
 
-**Project Name:** CarrStack Automation
+**Project Name:** careconnect Automation
 **Hackathon Problem 2: Dental Practice Marketing Automation**
 
 Develop an automated marketing solution for dental practices that can manage and act on patient data collected from multiple sources.
@@ -16,7 +16,7 @@ Key workflows to implement:
 2. **Lapsed Patient Reactivation:** Engage existing patients who have not scheduled their next appointment and follow up with them.
 3. **Post-Appointment Automation:** Automate post-appointment communication and encourage patients to leave reviews.
 
-Goal: Complete, functional prototype for hackathon presentation — monorepo with backend + dashboard + AI email parser + drip automation.
+Goal: Complete, functional prototype for hackathon presentation â€” monorepo with backend + dashboard + AI email parser + drip automation.
 
 ## 2. Tech Stack & Tooling Profile
 
@@ -40,50 +40,50 @@ Agent tool rules:
 - Never commit secrets. Use `.env` for `DATABASE_URL`, `LLM_API_KEY`, `SMTP_*`.
 - After each phase, run typecheck / build and report status.
 
-## 3. Directory Structure (Monorepo — Agent Must Create)
+## 3. Directory Structure (Monorepo â€” Agent Must Create)
 
 ```plaintext
-carrstack-automation/
-├── AGENTS.md                 # This file — agent instructions
-├── opencode.json             # Agent tool permissions ("bash": "allow", "edit": "allow")
-├── package.json              # Root workspace manager (npm workspaces)
-├── .env.example
-├── apps/
-│   ├── web/                  # Next.js staff dashboard (App Router + Tailwind)
-│   │   ├── app/
-│   │   │   ├── page.tsx      # Main dashboard: lapsed patients table
-│   │   │   └── api/
-│   ├── mobile/               # Expo app for staff notifications
-│   └── api-server/           # Node.js backend (Fastify/Express)
-│       ├── src/
-│       │   ├── index.ts
-│       │   ├── routes/
-│       │   │   ├── patients.ts
-│       │   │   ├── campaigns.ts
-│       │   │   └── communications.ts
-│       │   ├── services/
-│       │   │   ├── segmentation.ts
-│       │   │   └── drip-worker.ts
-│       │   └── lib/db.ts
-├── packages/
-│   ├── db/                   # PostgreSQL schema and ORM configs
-│   │   ├── schema.prisma     # or drizzle schema
-│   │   ├── migrations/
-│   │   └── seed.ts
-│   ├── email-parser/         # AI agent integration (Phi-3/LLaMA wrapper)
-│   │   ├── src/
-│   │   │   ├── parse.ts
-│   │   │   ├── llm-client.ts
-│   │   │   └── types.ts
-│   └── shared-types/         # Shared TypeScript interfaces
-│       ├── src/index.ts
-│       └── package.json
+careconnect-automation/
+â”œâ”€â”€ AGENTS.md                 # This file â€” agent instructions
+â”œâ”€â”€ opencode.json             # Agent tool permissions ("bash": "allow", "edit": "allow")
+â”œâ”€â”€ package.json              # Root workspace manager (npm workspaces)
+â”œâ”€â”€ .env.example
+â”œâ”€â”€ apps/
+â”‚   â”œâ”€â”€ web/                  # Next.js staff dashboard (App Router + Tailwind)
+â”‚   â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”‚   â”œâ”€â”€ page.tsx      # Main dashboard: lapsed patients table
+â”‚   â”‚   â”‚   â””â”€â”€ api/
+â”‚   â”œâ”€â”€ mobile/               # Expo app for staff notifications
+â”‚   â””â”€â”€ api-server/           # Node.js backend (Fastify/Express)
+â”‚       â”œâ”€â”€ src/
+â”‚       â”‚   â”œâ”€â”€ index.ts
+â”‚       â”‚   â”œâ”€â”€ routes/
+â”‚       â”‚   â”‚   â”œâ”€â”€ patients.ts
+â”‚       â”‚   â”‚   â”œâ”€â”€ campaigns.ts
+â”‚       â”‚   â”‚   â””â”€â”€ communications.ts
+â”‚       â”‚   â”œâ”€â”€ services/
+â”‚       â”‚   â”‚   â”œâ”€â”€ segmentation.ts
+â”‚       â”‚   â”‚   â””â”€â”€ drip-worker.ts
+â”‚       â”‚   â””â”€â”€ lib/db.ts
+â”œâ”€â”€ packages/
+â”‚   â”œâ”€â”€ db/                   # PostgreSQL schema and ORM configs
+â”‚   â”‚   â”œâ”€â”€ schema.prisma     # or drizzle schema
+â”‚   â”‚   â”œâ”€â”€ migrations/
+â”‚   â”‚   â””â”€â”€ seed.ts
+â”‚   â”œâ”€â”€ email-parser/         # AI agent integration (Phi-3/LLaMA wrapper)
+â”‚   â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”‚   â”œâ”€â”€ parse.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ llm-client.ts
+â”‚   â”‚   â”‚   â””â”€â”€ types.ts
+â”‚   â””â”€â”€ shared-types/         # Shared TypeScript interfaces
+â”‚       â”œâ”€â”€ src/index.ts
+â”‚       â””â”€â”€ package.json
 ```
 
 Root `package.json` workspaces:
 ```json
 {
-  "name": "carrstack-automation",
+  "name": "careconnect-automation",
   "private": true,
   "workspaces": ["apps/*", "packages/*"]
 }
@@ -148,9 +148,9 @@ CREATE TABLE campaigns (
 ```
 
 Seed `campaigns` with:
-1. `6-month lapsed` — `Hi {{first_name}}, it's been {{months_since_visit}} months since your {{last_procedure}}...`
-2. `post-appointment 24h` — `Thanks {{first_name}} for visiting... Please leave a review: [link]`
-3. `new lead follow-up` — `Hi {{first_name}}, thanks for your enquiry...`
+1. `6-month lapsed` â€” `Hi {{first_name}}, it's been {{months_since_visit}} months since your {{last_procedure}}...`
+2. `post-appointment 24h` â€” `Thanks {{first_name}} for visiting... Please leave a review: [link]`
+3. `new lead follow-up` â€” `Hi {{first_name}}, thanks for your enquiry...`
 
 ### 4.2 Key Segmentation Query (Lapsed Patients)
 
@@ -184,12 +184,12 @@ export interface ParsedIntent { intent:'booking_request'|'post_op_complication'|
 
 Base: `http://localhost:4000`
 
-- `GET /api/patients/lapsed` → `Patient[]` (uses JOIN query §4.2)
-- `GET /api/patients?status=lapsed` → filtered list
-- `POST /api/campaigns/:id/trigger` body `{ patient_ids:number[] }` → `{ queued:number }`
-- `POST /api/inbound-email` body `{ from:string; subject:string; body:string }` → `ParsedIntent`
-- `GET /api/communications?patient_id=` → `Communication[]`
-- `POST /api/appointments/:id/review-request` → triggers review template
+- `GET /api/patients/lapsed` â†’ `Patient[]` (uses JOIN query Â§4.2)
+- `GET /api/patients?status=lapsed` â†’ filtered list
+- `POST /api/campaigns/:id/trigger` body `{ patient_ids:number[] }` â†’ `{ queued:number }`
+- `POST /api/inbound-email` body `{ from:string; subject:string; body:string }` â†’ `ParsedIntent`
+- `GET /api/communications?patient_id=` â†’ `Communication[]`
+- `POST /api/appointments/:id/review-request` â†’ triggers review template
 
 ## 6. Sequential Build Instructions for OpenCode
 
@@ -213,7 +213,7 @@ Acceptance:
 - [ ] `packages/email-parser/src/llm-client.ts` supports `OLLAMA_URL` or `LLM_API_KEY`, falls back to regex mock if no key
 - [ ] `parse(email:string): ParsedIntent` returns `{intent, urgency, summary, suggested_action}`
 - [ ] `POST /api/inbound-email` wired in backend, stores row in `communications`
-- [ ] Unit test with 3 mock emails (booking, complication→high urgency, spam)
+- [ ] Unit test with 3 mock emails (booking, complicationâ†’high urgency, spam)
 
 Example I/O:
 Input: `"Hi, my tooth hurts badly after extraction yesterday, bleeding won't stop"`
@@ -226,7 +226,7 @@ Output: `{"intent":"post_op_complication","urgency":"high","summary":"...","sugg
 Acceptance:
 - [ ] `apps/web` Next.js App Router + Tailwind builds
 - [ ] `app/page.tsx` fetches `GET /api/patients/lapsed`, responsive table (name, email, last visit, status)
-- [ ] `Trigger Reactivation Campaign` button per row → `POST /api/campaigns/:id/trigger`
+- [ ] `Trigger Reactivation Campaign` button per row â†’ `POST /api/campaigns/:id/trigger`
 - [ ] Tabs/sections for 3 workflows: Leads / Lapsed / Post-Appointment Reviews
 
 ### Phase 4: Automated Drip Logic
@@ -236,13 +236,13 @@ Acceptance:
 Acceptance:
 - [ ] `apps/api-server/src/services/drip-worker.ts` cron (e.g. daily 9am) queries lapsed + renders `campaigns.template_body` tokens
 - [ ] Mock SMTP (console/Ethereal) logs payload, writes `communications` outbound row
-- [ ] Post-appointment 24h job: `completed` appointments → review request email
+- [ ] Post-appointment 24h job: `completed` appointments â†’ review request email
 - [ ] `GET /api/communications?patient_id=` shows full loop for demo
 
 ## 7. Demo Script (Hackathon Presentation)
 
-1. Show dashboard lapsed table → click Trigger → show mock email in console + `communications` row.
-2. Paste inbound email → show `ParsedIntent` JSON → auto booking created.
+1. Show dashboard lapsed table â†’ click Trigger â†’ show mock email in console + `communications` row.
+2. Paste inbound email â†’ show `ParsedIntent` JSON â†’ auto booking created.
 3. Show post-appointment review automation.
 4. Emphasize normalized SQL JOINs + LLM parsing + drip worker.
 
@@ -252,5 +252,5 @@ Acceptance:
 2. Keep changes scoped to current phase to preserve `/undo`.
 3. Prefer editing existing files over creating new ones.
 4. Run `npx tsc --noEmit` and framework build before marking phase done.
-5. If blocked (no DB, no LLM key), use mocks/fallbacks and note in output — do not halt.
+5. If blocked (no DB, no LLM key), use mocks/fallbacks and note in output â€” do not halt.
 6. Never output secrets. Use `.env.example`.

@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import type { Appointment } from "@carrstack/shared-types";
+import type { Appointment } from "@careconnect/shared-types";
 import { getLapsedPatients } from "./segmentation.js";
 import { campaigns, renderTemplate, lastProcedureFor, getPatientById } from "../lib/campaigns.js";
 import { saveOutboundCommunication, listCommunications } from "../lib/communications.js";
@@ -62,8 +62,8 @@ export interface ReviewDripOpts {
 /**
  * Post-appointment drip: completed appointments whose age falls in
  * [minAgeHours, maxAgeHours] get campaign #2 (review request).
- * Cron uses 23–25h so each appointment triggers exactly once, one hour after
- * its 24h anniversary. Demo/manual runs use 0–24h ("completed in last day").
+ * Cron uses 23â€“25h so each appointment triggers exactly once, one hour after
+ * its 24h anniversary. Demo/manual runs use 0â€“24h ("completed in last day").
  */
 export async function runReviewDrip(opts: ReviewDripOpts = {}): Promise<DripResult> {
   const { minAgeHours = 0, maxAgeHours = 24, now = new Date(), appointments = seedAppointments } = opts;
@@ -81,7 +81,7 @@ export async function runReviewDrip(opts: ReviewDripOpts = {}): Promise<DripResu
   for (const appt of due) {
     const patient = getPatientById(appt.patient_id);
     if (!patient) continue;
-    // One review request per appointment — skip if already sent after the visit.
+    // One review request per appointment â€” skip if already sent after the visit.
     if (await alreadySent(appt.patient_id, `${REVIEW_MARKER}#${appt.id}`, new Date(appt.date))) continue;
     const text = renderTemplate(campaign.template_body, patient as any, {
       last_procedure: appt.procedure_type,
@@ -115,7 +115,7 @@ export async function sendReviewForAppointment(appointmentId: number): Promise<D
 }
 
 /**
- * Scheduler — daily 9am lapsed drip + hourly 24h-anniversary review check.
+ * Scheduler â€” daily 9am lapsed drip + hourly 24h-anniversary review check.
  * Disabled with ENABLE_CRON=false (tests, hackathon manual demo).
  */
 export function startDripCron(): void {

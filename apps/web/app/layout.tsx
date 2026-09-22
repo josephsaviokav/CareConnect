@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 
-// CareStack-style pairing: geometric display face + neutral body face
+// Geometric display face + neutral body face
 const display = Poppins({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
@@ -15,7 +15,7 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CarrStack — Dental Marketing Dashboard",
+  title: "CareConnect — Dental Marketing Dashboard",
   description: "Lapsed patient reactivation, lead conversion, post-appointment reviews",
 };
 

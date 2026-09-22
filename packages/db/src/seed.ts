@@ -1,5 +1,5 @@
 // Seed runner: inserts seed-data into Postgres if DATABASE_URL set,
-// otherwise prints mock summary. Run via: npm run seed --workspace=@carrstack/db
+// otherwise prints mock summary. Run via: npm run seed --workspace=@careconnect/db
 import pg from "pg";
 import { seedPatients, seedAppointments } from "./seed-data.js";
 

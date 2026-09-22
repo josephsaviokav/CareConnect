@@ -1,4 +1,4 @@
-import type { Patient, Appointment } from "@carrstack/shared-types";
+import type { Patient, Appointment } from "@careconnect/shared-types";
 
 // Helper to build dates relative to now for realistic seed
 const monthsAgo = (n: number) => {

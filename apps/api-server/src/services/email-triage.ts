@@ -1,4 +1,4 @@
-import type { ParsedIntent } from "@carrstack/shared-types";
+import type { ParsedIntent } from "@careconnect/shared-types";
 
 /**
  * Self-contained email triage for api-server (mirrors packages/email-parser).

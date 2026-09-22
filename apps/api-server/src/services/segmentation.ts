@@ -1,11 +1,11 @@
-import type { Patient, Appointment } from "@carrstack/shared-types";
+import type { Patient, Appointment } from "@careconnect/shared-types";
 import { seedPatients, seedAppointments } from "../lib/seed-data.js";
 
 // Re-export seed for API use (mock fallback when no DATABASE_URL)
 export { seedPatients, seedAppointments };
 
 /**
- * Core segmentation logic — mirrors the SQL JOIN in AGENTS.md §4.2:
+ * Core segmentation logic â€” mirrors the SQL JOIN in AGENTS.md Â§4.2:
  * Lapsed = last_visit_date < NOW() - 6 months AND no upcoming scheduled appointment
  * AND status IN ('active','lapsed')
  */
@@ -33,7 +33,7 @@ export function getLapsedPatients(
   });
 }
 
-// Exact SQL used when Postgres is available (AGENTS.md §4.2)
+// Exact SQL used when Postgres is available (AGENTS.md Â§4.2)
 export const LAPSED_PATIENTS_SQL = `
 SELECT p.*, MAX(a.date) AS last_appointment
 FROM patients p

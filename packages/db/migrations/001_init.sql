@@ -1,4 +1,4 @@
--- CarrStack initial migration: strictly normalized schema
+-- careconnect initial migration: strictly normalized schema
 CREATE TABLE IF NOT EXISTS patients (
   id SERIAL PRIMARY KEY,
   first_name TEXT NOT NULL,

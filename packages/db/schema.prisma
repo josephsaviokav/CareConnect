@@ -1,4 +1,4 @@
-// Prisma schema for CarrStack Automation
+// Prisma schema for careconnect Automation
 // Run: npx prisma migrate dev --name init (requires DATABASE_URL)
 generator client {
   provider = "prisma-client-js"

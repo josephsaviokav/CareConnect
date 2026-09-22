@@ -1,5 +1,5 @@
 {
-  "name": "@carrstack/email-parser",
+  "name": "@careconnect/email-parser",
   "version": "0.1.0",
   "type": "module",
   "main": "src/index.ts",
@@ -9,7 +9,7 @@
     "test:mocks": "tsx src/test-mocks.ts"
   },
   "dependencies": {
-    "@carrstack/shared-types": "*"
+    "@careconnect/shared-types": "*"
   },
   "devDependencies": {
     "tsx": "^4.16.2",

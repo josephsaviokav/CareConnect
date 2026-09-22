@@ -256,9 +256,9 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-white/10 bg-[#081F14] lg:flex">
         <div className="flex items-center gap-2.5 px-5 pb-6 pt-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand font-display text-lg font-bold text-brand-ink">0</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand font-display text-lg font-bold text-brand-ink">C</span>
           <span>
-            <span className="block font-display text-sm font-bold leading-tight">BrightSmile</span>
+            <span className="block font-display text-sm font-bold leading-tight">CareConnect</span>
             <span className="block text-[11px] text-sage">Dental Practice</span>
           </span>
         </div>
@@ -290,7 +290,7 @@ export default function Dashboard() {
         {/* Top bar */}
         <header className="flex items-center gap-3 border-b border-white/10 px-4 py-4 sm:px-8">
           <div className="lg:hidden">
-            <span className="font-display text-sm font-bold">BrightSmile</span>
+            <span className="font-display text-sm font-bold">CareConnect</span>
           </div>
           <div className="hidden lg:block">
             <h1 className="font-display text-xl font-semibold">{VIEW_LABELS[view]}</h1>
