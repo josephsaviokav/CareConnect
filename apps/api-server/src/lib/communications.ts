@@ -64,6 +64,39 @@ export async function saveInboundCommunication(args: {
   return rec;
 }
 
+export async function saveOutboundCommunication(args: {
+  patient_id: number;
+  content: string;
+  type?: string;
+}): Promise<StoredCommunication> {
+  if (pool) {
+    const { rows } = await pool.query(
+      `INSERT INTO communications (patient_id, type, direction, content, urgency)
+       VALUES ($1, $2, 'outbound', $3, 'low') RETURNING *`,
+      [args.patient_id, args.type || "email", args.content]
+    );
+    const r = rows[0];
+    return {
+      id: r.id, patient_id: r.patient_id, type: r.type, direction: r.direction,
+      content: r.content, intent: r.intent, urgency: r.urgency,
+      timestamp: new Date(r.timestamp).toISOString(),
+    };
+  }
+  const rec: StoredCommunication = {
+    id: nextId++,
+    patient_id: args.patient_id,
+    type: args.type || "email",
+    direction: "outbound",
+    content: args.content,
+    urgency: "low",
+    timestamp: new Date().toISOString(),
+  };
+  memory.push(rec);
+  // Mock SMTP dispatch — visible in api-server console for hackathon demo
+  console.log(`[mock-smtp] to patient ${args.patient_id}: ${args.content.slice(0, 160)}`);
+  return rec;
+}
+
 export async function listCommunications(patient_id?: number): Promise<StoredCommunication[]> {
   if (pool) {
     if (patient_id !== undefined) {

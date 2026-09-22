@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import dotenv from "dotenv";
 import { patientRoutes } from "./routes/patients.js";
 import { inboundRoutes } from "./routes/inbound.js";
+import { campaignRoutes } from "./routes/campaigns.js";
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ await app.register(cors, { origin: true });
 
 await app.register(patientRoutes);
 await app.register(inboundRoutes);
+await app.register(campaignRoutes);
 
 const port = Number(process.env.PORT || 4000);
 try {
