@@ -166,6 +166,61 @@ app.get("/api/communications", async (c) => {
   return c.json(results);
 });
 
+// ---- Auth (demo-grade: PBKDF2-SHA256, 100k iters; use a real IdP in production) ----
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
+  const b = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < b.length; i++) b[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  return b;
+}
+
+async function verifyPassword(password: string, saltHex: string, hashHex: string): Promise<boolean> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: hexToBytes(saltHex), iterations: 100000, hash: "SHA-256" },
+    key,
+    256
+  );
+  const got = [...new Uint8Array(bits)].map((x) => x.toString(16).padStart(2, "0")).join("");
+  if (got.length !== hashHex.length) return false;
+  let diff = 0;
+  for (let i = 0; i < got.length; i++) diff |= got.charCodeAt(i) ^ hashHex.charCodeAt(i);
+  return diff === 0;
+}
+
+app.post("/api/auth/login", async (c) => {
+  const body: { email?: string; password?: string } = await c.req.json().catch(() => ({}));
+  if (!body.email || !body.password) return c.json({ error: "Email and password required" }, 400);
+  const user = await c.env.DB.prepare("SELECT * FROM users WHERE LOWER(email) = LOWER(?)").bind(body.email).first<any>();
+  if (!user || !(await verifyPassword(body.password, user.salt, user.password_hash))) {
+    return c.json({ error: "Invalid email or password" }, 401);
+  }
+  const token = `${crypto.randomUUID()}.${crypto.randomUUID()}`;
+  const expires_at = new Date(Date.now() + 12 * 3600 * 1000).toISOString();
+  await c.env.DB.prepare("INSERT INTO sessions (token, user_id, role, expires_at) VALUES (?, ?, ?, ?)")
+    .bind(token, user.id, user.role, expires_at).run();
+  return c.json({ token, role: user.role, name: user.name, email: user.email, patient_id: user.patient_id, expires_at });
+});
+
+app.get("/api/auth/me", async (c) => {
+  const auth = c.req.header("Authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token) return c.json({ error: "Missing token" }, 401);
+  const s = await c.env.DB.prepare(
+    "SELECT s.role, s.expires_at, u.name, u.email, u.patient_id FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?"
+  ).bind(token).first<any>();
+  if (!s || new Date(s.expires_at).getTime() < Date.now()) {
+    return c.json({ error: "Invalid or expired session" }, 401);
+  }
+  return c.json({ role: s.role, name: s.name, email: s.email, patient_id: s.patient_id, expires_at: s.expires_at });
+});
+
+app.post("/api/auth/logout", async (c) => {
+  const auth = c.req.header("Authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (token) await c.env.DB.prepare("DELETE FROM sessions WHERE token = ?").bind(token).run();
+  return c.json({ ok: true });
+});
+
 app.get("/api/appointments", async (c) => {
   const status = c.req.query("status");
   const patient_id = c.req.query("patient_id");

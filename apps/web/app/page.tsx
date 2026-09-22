@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiBase, clearSession, loadSession, type Session } from "./lib/session";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API = apiBase();
 
 type View = "dashboard" | "patients" | "appointments" | "treatments" | "billing";
 
@@ -118,6 +120,9 @@ function StatusBadge({ text, tone }: { text: string; tone: "lime" | "orange" }) 
 }
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [view, setView] = useState<View>("dashboard");
   const [patients, setPatients] = useState<Patient[]>([]);
   const [lapsed, setLapsed] = useState<Patient[]>([]);
@@ -153,7 +158,26 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const s = loadSession();
+    if (!s) { router.replace("/login"); return; }
+    if (s.role !== "clinic") { router.replace("/portal"); return; }
+    setSession(s);
+    setAuthReady(true);
+  }, [router]);
+
+  useEffect(() => { if (authReady) load(); }, [load, authReady]);
+
+  function signOut() {
+    if (session) {
+      fetch(`${API}/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.token}` },
+      }).catch(() => {});
+    }
+    clearSession();
+    router.replace("/login");
+  }
 
   const patientById = useMemo(() => new Map(patients.map((p) => [p.id, p])), [patients]);
   const nameOf = useCallback((id: number) => {
@@ -251,6 +275,14 @@ export default function Dashboard() {
   ];
   const accentBar = { lime: "border-brand", blue: "border-sky-400", orange: "border-orange-400" };
 
+  if (!authReady) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-forest-950 font-sans text-sm text-sage">
+        Checking session…
+      </main>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-forest-950 font-sans text-cream">
       {/* Sidebar */}
@@ -276,12 +308,19 @@ export default function Dashboard() {
             </button>
           ))}
         </nav>
-        <div className="mt-auto flex items-center gap-2.5 border-t border-white/10 px-5 py-4">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/20 font-display text-[11px] font-semibold text-brand">LP</span>
-          <span>
-            <span className="block text-[13px] font-semibold leading-tight">Dr. Lauren Park</span>
-            <span className="block text-[11px] text-sage">Lead Dentist</span>
-          </span>
+        <div className="mt-auto border-t border-white/10 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/20 font-display text-[11px] font-semibold text-brand">
+              {session ? initials(session.name) : "••"}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] font-semibold leading-tight">{session?.name || "Staff"}</span>
+              <span className="block text-[11px] text-sage">Clinic staff</span>
+            </span>
+          </div>
+          <button onClick={signOut} className="mt-2.5 w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium text-sage ring-1 ring-white/10 hover:bg-white/5 hover:text-cream">
+            Sign out
+          </button>
         </div>
       </aside>
 
